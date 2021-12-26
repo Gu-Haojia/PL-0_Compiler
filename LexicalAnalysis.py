@@ -2,7 +2,8 @@ from Cache import *
 from Symbol import *
 
 
-def lexical_analysis(filename):
+def lexical_analyse(filename,need_log):
+    olog=[]
     Error = 0
     IDindex = 0
     if filename == '':
@@ -33,14 +34,14 @@ def lexical_analysis(filename):
                 if word in KEYWORDS:
                     SYMBOL.append(KEYWORDS[word])
                     Position.append((line_num, index - len(word) + 1))
-                    print(line_num, '<', word, ',KEYWORD >')
+                    olog.append(str(line_num)+' < ' + word + ',KEYWORD >')
                     outlog.writelines('< ' + word + ',KEYWORD >' + '\n')
 
                 # 处理单词型操作符
                 elif word in OPERATORS:
                     SYMBOL.append(OPERATORS[word])
                     Position.append((line_num, index - len(word) + 1))
-                    print(line_num, '<', word, ',OPERATOR >')
+                    olog.append(str(line_num)+' < ' + word + ',OPERATOR >')
                     outlog.writelines('< ' + word + ',OPERATOR >' + '\n')
 
                 # 处理标识符
@@ -51,7 +52,7 @@ def lexical_analysis(filename):
                         IDENTIFIER[word] = IDindex  # 字典新增
                         IDindex = IDindex + 1
                     IDlist.append(word)
-                    print(line_num, '<', word, ',IDENTIFIER >')
+                    olog.append(str(line_num)+' < ' + word + ',IDENTIFIER >')
                     outlog.writelines('< ' + word + ',IDENTIFIER >' + '\n')
                 del word
             elif line[index].isdigit():  # 处理数字开头
@@ -76,7 +77,7 @@ def lexical_analysis(filename):
                     SYMBOL.append(number)
                     NUMlist.append(int(word))
                     Position.append((line_num, index - len(word) + 1))
-                    print(line_num, '<', word, ',NUMBER >')
+                    olog.append(str(line_num)+' < ' + word + ',NUMBER >')
                     outlog.writelines('< ' + word + ',NUMBER >' + '\n')
                 del word
 
@@ -85,7 +86,7 @@ def lexical_analysis(filename):
                 if line[index + 1] == '=':
                     SYMBOL.append(OPERATORS[':='])
                     Position.append((line_num, index + 1))
-                    print(line_num, '<', ':=', ',ASSIGNMENT >')
+                    olog.append(str(line_num)+' < ' + ':=' + ',ASSIGNMENT >')
                     outlog.writelines('< ' + ':=' + ',ASSIGNMENT >' + '\n')
                     index = index + 2
                 else:
@@ -99,19 +100,19 @@ def lexical_analysis(filename):
                 if line[index + 1] == '=':
                     SYMBOL.append(OPERATORS['<='])
                     Position.append((line_num, index + 1))
-                    print(line_num, '<', '>=', ',OPERATOR >')
+                    olog.append(str(line_num)+' < ' + '>=' + ',OPERATOR >')
                     outlog.writelines('< ' + '>=' + ',OPERATOR >' + '\n')
                     index = index + 2
                 elif line[index + 1] == '>':
                     SYMBOL.append(OPERATORS['<>'])
                     Position.append((line_num, index + 1))
-                    print(line_num, '<', '<>', ',OPERATOR >')
+                    olog.append(str(line_num)+' < ' + '<>' + ',OPERATOR >')
                     outlog.writelines('< ' + '<>' + ',OPERATOR >' + '\n')
                     index = index + 2
                 else:
                     SYMBOL.append(OPERATORS['<'])
                     Position.append((line_num, index + 1))
-                    print(line_num, '<', '<', ',OPERATOR >')
+                    olog.append(str(line_num)+' < ' + '<' + ',OPERATOR >')
                     outlog.writelines('< ' + '<' + ',OPERATOR >' + '\n')
                     index += 1
 
@@ -120,13 +121,13 @@ def lexical_analysis(filename):
                 if line[index + 1] == '=':
                     SYMBOL.append(OPERATORS['>='])
                     Position.append((line_num, index + 1))
-                    print(line_num, '<', '>=', ',OPERATOR >')
+                    olog.append(str(line_num)+' < ' + '>=' + ',OPERATOR >')
                     outlog.writelines('< ' + '>=' + ',OPERATOR >' + '\n')
                     index = index + 2
                 else:
                     SYMBOL.append(OPERATORS['>'])
                     Position.append((line_num, index + 1))
-                    print(line_num, '<', '>', ',OPERATOR >')
+                    olog.append(str(line_num)+' < ' + '>' + ',OPERATOR >')
                     outlog.writelines('< ' + '>' + ',OPERATOR >' + '\n')
                     index += 1
 
@@ -134,7 +135,7 @@ def lexical_analysis(filename):
             elif line[index] in OPERATORS:
                 SYMBOL.append(OPERATORS[line[index]])
                 Position.append((line_num, index + 1))
-                print(line_num, '<', line[index], ',OPERATOR >')
+                olog.append(str(line_num)+' < ' + line[index] + ',OPERATOR >')
                 outlog.writelines('< ' + line[index] + ',OPERATOR >' + '\n')
                 index += 1
 
@@ -142,7 +143,7 @@ def lexical_analysis(filename):
             elif line[index] in DELIMITERS:
                 SYMBOL.append(DELIMITERS[line[index]])
                 Position.append((line_num, index + 1))
-                print(line_num, '<', line[index], ',DELIMITER >')
+                olog.append(str(line_num)+' < ' + line[index] + ',DELIMITER >')
                 outlog.writelines('< ' + line[index] + ',DELIMITER >' + '\n')
                 index += 1
 
@@ -155,7 +156,9 @@ def lexical_analysis(filename):
                 index += 1
     sourcefile.close()
     outlog.close()
-
+    if need_log=='Y' or need_log=='y':
+        for i in olog:
+            print(i)
     if Error == 1:
         print("词法分析出错")
         exit(-1)
