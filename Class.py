@@ -4,7 +4,7 @@ FUN = Enum('FUN', ('LIT', 'LOD', 'STO', 'CAL', 'INT', 'JMP', 'JPC', 'OPR'))
 KIND = Enum('KIND', ('CONSTANT', 'VARIABLE', 'PROCEDURE'))
 isConst = 0
 isVar = 1
-isProc=2
+isProc = 2
 
 
 class Code:
@@ -46,9 +46,9 @@ class Table:
 
     def find(self, name):  # 当标识符是变量时返回层差和地址Flag=1，当标识符是常量时返回层差和值Flag=0
         if name in self.entries:
-            if self.entries[name].kind==KIND['CONSTANT']:  # 是常量
+            if self.entries[name].kind == KIND['CONSTANT']:  # 是常量
                 return (0, self.entries[name].val, isConst)
-            elif self.entries[name].kind==KIND['PROCEDURE']:  # 是常量
+            elif self.entries[name].kind == KIND['PROCEDURE']:  # 是常量
                 return (0, self.entries[name].adr, isProc)
             else:
                 return (0, self.entries[name].adr, isVar)
@@ -113,3 +113,23 @@ class Entry:
             msg += 'LEVEL:' + str(self.level) + '\t\t'
         msg += 'ADR:' + str(self.adr)
         return msg
+
+
+class Reg:
+    def __init__(self, data=None):
+        self.__data = data
+
+    def set(self, data):  # 设置内容
+        self.__data = data
+
+    def get(self):  # 获取内容
+        return self.__data
+
+    def __add__(self, other):
+        return self.get() + other.get()
+
+    def inc(self):  # 寄存器自增一
+        self.__data += 1
+
+    def dec(self):  # 寄存器自减一
+        self.__data -= 1
