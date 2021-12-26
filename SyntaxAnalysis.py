@@ -554,8 +554,7 @@ def deal_factor(table):
 
 # <lop> → =|<>|<|<=|>|>=
 def deal_lop():
-    if SYMBOL[ptr] == OPERATORS['='] or SYMBOL[ptr] == OPERATORS['<>'] or SYMBOL[ptr] == OPERATORS['<'] or SYMBOL[
-        ptr] == OPERATORS['<='] or SYMBOL[ptr] == OPERATORS['>'] or SYMBOL[ptr] == OPERATORS['>=']:
+    if SYMBOL[ptr] == OPERATORS['='] or SYMBOL[ptr] == OPERATORS['<>'] or SYMBOL[ptr] == OPERATORS['<'] or SYMBOL[ptr] == OPERATORS['<='] or SYMBOL[ptr] == OPERATORS['>'] or SYMBOL[ptr] == OPERATORS['>=']:
         opr = SYMBOL[ptr]
         nextptr()
         return opr
@@ -566,8 +565,7 @@ def deal_lop():
 
 # <lexp> → <exp> <lop> <exp>|odd <exp>
 def deal_lexp(table):
-    if SYMBOL[ptr] == OPERATORS['+'] or SYMBOL[ptr] == OPERATORS['-'] or SYMBOL[ptr] == identifier or SYMBOL[
-        ptr] == number or SYMBOL[ptr] == DELIMITERS['(']:
+    if SYMBOL[ptr] == OPERATORS['+'] or SYMBOL[ptr] == OPERATORS['-'] or SYMBOL[ptr] == identifier or SYMBOL[ptr] == number or SYMBOL[ptr] == DELIMITERS['(']:
         deal_expr(table)
         opr = deal_lop()
         deal_expr(table)
