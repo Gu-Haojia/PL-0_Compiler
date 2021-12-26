@@ -2,19 +2,20 @@ from Cache import *
 from Class import *
 from Symbol import *
 
-ptr = 0
-num_index = 0
-id_index = 0
-eflag = 0
-maintable = Table()
-entrycode = Code('JMP', 0, None)
+ptr = 0  # 元素指针（SYMBOL)
+num_index = 0  # 数字指针
+id_index = 0  # 标识符指针
+maintable = Table()  # 符号表母表
+entrycode = Code('JMP', 0, None)  # 入口代码
 
 
+# 下一个符号
 def nextptr():
     global ptr
     ptr += 1
 
 
+# 出错处理
 def error(msg):
     global ptr
     msg = str(Position[ptr]) + '  ' + msg
@@ -22,13 +23,15 @@ def error(msg):
     exit(-1)
 
 
+# 获取下一个数字
 def get_num():
     global num_index
-    number = NUMlist[num_index]
+    number_val = NUMlist[num_index]
     num_index += 1
-    return number
+    return number_val
 
 
+# 获取下一个标识符名称
 def get_id():
     global id_index
     name = IDlist[id_index]
@@ -36,6 +39,7 @@ def get_id():
     return name
 
 
+# 入口
 def syntax_analyse(need_log):
     codelist.append(entrycode)
     tablelist.append(maintable)
@@ -44,12 +48,13 @@ def syntax_analyse(need_log):
     for i, x in enumerate(codelist):
         outlog.writelines(str(i) + ':\t' + str(x) + '\n')
     outlog.close()
-    if need_log=='Y' or need_log=='y':
+    if need_log == 'Y' or need_log == 'y':
         for i, x in enumerate(codelist):
             print(str(i) + ':\t\t' + str(x))
     return
 
 
+# <prog> → program <id>；<block>
 def deal_program(table):
     if SYMBOL[ptr] != KEYWORDS['program']:
         msg = 'expect symbol \'program\''
@@ -77,6 +82,7 @@ def deal_program(table):
     print('SyntaxAnalyser: no error detected')
 
 
+# <block> → [<condecl>][<vardecl>][<proc>]<body>
 def deal_block(table, entry):
     if SYMBOL[ptr] == KEYWORDS['const']:
         deal_condecl(table)
@@ -98,6 +104,7 @@ def deal_block(table, entry):
     codelist.append(Code('OPR', 0, 0))
 
 
+# <condecl> → const <const>{,<const>};
 def deal_condecl(table):
     if SYMBOL[ptr] != KEYWORDS['const']:
         msg = 'expect \'const\''
@@ -114,6 +121,7 @@ def deal_condecl(table):
         error(msg)
 
 
+# <const> → <id>:=<integer>
 def deal_const(table):
     if SYMBOL[ptr] != identifier:
         msg = 'expect identifier'
@@ -138,6 +146,7 @@ def deal_const(table):
         error(msg)
 
 
+# <vardecl> → var <id>{,<id>};
 def deal_var(table):
     if SYMBOL[ptr] != KEYWORDS['var']:
         msg = 'expect \'var\''
@@ -176,6 +185,7 @@ def deal_var(table):
         error(msg)
 
 
+# <proc> → procedure <id>（[<id>{,<id>}]）;<block>{;<proc>}
 def deal_procedure(table):
     if SYMBOL[ptr] != KEYWORDS['procedure']:
         msg = 'expect \'procedure\''
@@ -249,6 +259,7 @@ def deal_procedure(table):
             error(msg)
 
 
+# <body> → begin <statement>{;<statement>}end
 def deal_body(table):
     if SYMBOL[ptr] != KEYWORDS['begin']:
         msg = 'expect \'begin\''
@@ -268,6 +279,13 @@ def deal_body(table):
         nextptr()
 
 
+# <statement> →  <id> := <exp>
+#                |if <lexp> then <statement>[else <statement>]
+#                |while <lexp> do <statement>
+#                |call <id>（[<exp>{,<exp>}]）
+#                |<body>
+#                |read (<id>{，<id>})
+#                |write (<exp>{,<exp>})
 def deal_statement(table):
     if SYMBOL[ptr] == identifier:
         deal_assign(table)
@@ -288,6 +306,7 @@ def deal_statement(table):
         error(msg)
 
 
+# <id> := <exp>
 def deal_assign(table):
     name = get_id()
     nextptr()
@@ -310,6 +329,7 @@ def deal_assign(table):
         codelist.append(Code('STO', l, a))
 
 
+# if <lexp> then <statement>[else <statement>]
 def deal_if(table):
     nextptr()
     deal_lexp(table)
@@ -333,6 +353,7 @@ def deal_if(table):
         falseout.a = len(codelist)
 
 
+# while <lexp> do <statement>
 def deal_while(table):
     nextptr()
     current = len(codelist)
@@ -350,6 +371,7 @@ def deal_while(table):
         error(msg)
 
 
+# read (<id>{，<id>})
 def deal_read(table):
     nextptr()
     if SYMBOL[ptr] == DELIMITERS['(']:
@@ -405,6 +427,7 @@ def deal_read(table):
         error(msg)
 
 
+# write (<exp>{,<exp>})
 def deal_write(table):
     nextptr()
     if SYMBOL[ptr] == DELIMITERS['(']:
@@ -425,6 +448,7 @@ def deal_write(table):
         error(msg)
 
 
+# call <id>（[<exp>{,<exp>}]）
 def deal_call(table):
     nextptr()
     if SYMBOL[ptr] != identifier:
@@ -469,6 +493,7 @@ def deal_call(table):
     codelist.append(Code('CAL', l, a))
 
 
+# <exp> → [+|-]<term>{<aop><term>}
 def deal_expr(table):
     if SYMBOL[ptr] == OPERATORS['+']:
         nextptr()
@@ -482,20 +507,22 @@ def deal_expr(table):
         deal_term(table)
     while SYMBOL[ptr] == OPERATORS['+'] or SYMBOL[ptr] == OPERATORS['-']:
         opr = SYMBOL[ptr]
-        deal_aop(table)
+        deal_aop()
         deal_term(table)
         codelist.append(Code('OPR', 0, opr))
 
 
+# <term> → <factor>{<mop><factor>}
 def deal_term(table):
     deal_factor(table)
     while SYMBOL[ptr] == OPERATORS['*'] or SYMBOL[ptr] == OPERATORS['/']:  # 先乘除，后加减
         opr = SYMBOL[ptr]
-        deal_mop(table)
+        deal_mop()
         deal_factor(table)
         codelist.append(Code('OPR', 0, opr))
 
 
+# <factor>→<id>|<integer>|(<exp>)
 def deal_factor(table):
     if SYMBOL[ptr] == identifier:
         name = get_id()
@@ -525,8 +552,10 @@ def deal_factor(table):
         error(msg)
 
 
-def deal_lop(table):
-    if SYMBOL[ptr] == OPERATORS['='] or SYMBOL[ptr] == OPERATORS['<>'] or SYMBOL[ptr] == OPERATORS['<'] or SYMBOL[ptr] == OPERATORS['<='] or SYMBOL[ptr] == OPERATORS['>'] or SYMBOL[ptr] == OPERATORS['>=']:
+# <lop> → =|<>|<|<=|>|>=
+def deal_lop():
+    if SYMBOL[ptr] == OPERATORS['='] or SYMBOL[ptr] == OPERATORS['<>'] or SYMBOL[ptr] == OPERATORS['<'] or SYMBOL[
+        ptr] == OPERATORS['<='] or SYMBOL[ptr] == OPERATORS['>'] or SYMBOL[ptr] == OPERATORS['>=']:
         opr = SYMBOL[ptr]
         nextptr()
         return opr
@@ -535,10 +564,12 @@ def deal_lop(table):
         error(msg)
 
 
+# <lexp> → <exp> <lop> <exp>|odd <exp>
 def deal_lexp(table):
-    if SYMBOL[ptr] == OPERATORS['+'] or SYMBOL[ptr] == OPERATORS['-'] or SYMBOL[ptr] == identifier or SYMBOL[ptr] == number or SYMBOL[ptr] == DELIMITERS['(']:
+    if SYMBOL[ptr] == OPERATORS['+'] or SYMBOL[ptr] == OPERATORS['-'] or SYMBOL[ptr] == identifier or SYMBOL[
+        ptr] == number or SYMBOL[ptr] == DELIMITERS['(']:
         deal_expr(table)
-        opr = deal_lop(table)
+        opr = deal_lop()
         deal_expr(table)
         codelist.append(Code('OPR', 0, opr))
     elif SYMBOL[ptr] == OPERATORS['odd']:
@@ -550,9 +581,9 @@ def deal_lexp(table):
         error(msg)
 
 
-def deal_aop(table):
+def deal_aop():
     nextptr()
 
 
-def deal_mop(table):
+def deal_mop():
     nextptr()
