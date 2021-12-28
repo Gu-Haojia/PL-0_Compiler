@@ -16,18 +16,6 @@
 
 ------
 
-<center>
-作者：顾浩嘉 姜玉先 赵安
-    </center>
-<center>
-班级：1819002
-    </center><center>
-指导老师：杨志斌
-</center><center>
-地点：103实验室
-</center><center>
-时间：2021年12月27日
-</center>
 
 
 
@@ -141,11 +129,11 @@
 
 ### （5）数据流图
 
-<img src="E:\Code\PL-0 Compiler\pic\pic1.png" alt="pic1" style="zoom:67%;" />
+![image](https://github.com/Yuuki-Yoda/PL-0_Compiler/blob/master/pic/pic1.png)
 
 ### （6）中间代码结构
 
-<img src="E:\Code\PL-0 Compiler\pic\pic2.png" alt="pic2" style="zoom:67%;" />
+![image](https://github.com/Yuuki-Yoda/PL-0_Compiler/blob/master/pic/pic2.png)
 
 
 
@@ -1674,10 +1662,3 @@ end
 
 ​	2.建议在设计内容中添加优化部分的内容，有成员感觉本设计与八、九、十章内容相关性较弱。
 
-## 七、小组分工
-
-顾浩嘉：词法分析、语法分析、主程序
-
-姜玉先：报告撰写
-
-赵安：解释执行程序
